@@ -3,19 +3,17 @@ import InputGroup from "../../common/inputGroup";
 import * as Yup from 'yup';
 import { Formik, Form } from "formik";
 import { ILoginModel } from "../../../types/auth";
-import { useDispatch } from "react-redux";
-import { bindActionCreators } from "redux";
-import ActionCreators from "../../../store/action-creators";
+import { useActions } from "../../../hooks/useActions";
+import { useNavigate } from "react-router-dom";
 
-const useActions = () => {
-    const dispatch = useDispatch();
-    return bindActionCreators(ActionCreators, dispatch);
-}
-const LoginPage = () => {
+
+const LoginPage: React.FC = () => {
     const { LoginUser } = useActions();
+    const navigate = useNavigate();
+    const passwordRegExp = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-_]).{8,}$/
     const LoginScheme = Yup.object().shape({
         email: Yup.string().email('Email must be a valid email address').required('Email is required'),
-        password: Yup.string().required('Password is required'),
+        password: Yup.string().matches(passwordRegExp, 'Password is not valid').required('Password is required'),
     });
 
     const initialValues: ILoginModel = { email: '', password: '' };
@@ -26,8 +24,14 @@ const LoginPage = () => {
                 <Formik
                     initialValues={initialValues}
                     validationSchema={LoginScheme}
-                    onSubmit={(values: ILoginModel) => {
-                        LoginUser(values);
+                    onSubmit={async (values: ILoginModel) => {
+                        try {
+                            await LoginUser(values);
+                            navigate("/");
+                        }
+                        catch (ex) {
+
+                        }
 
                     }}>
                     {({ errors, touched }) => (
@@ -40,7 +44,7 @@ const LoginPage = () => {
                                 <InputGroup label="Password" field="password" type="password" />
                                 {touched.password && errors.password && <div className="text-danger mb-2">{errors.password}</div>}
                             </div>
-                            <button type="submit" className="btn btn-primary">Login</button>
+                            <button type="submit" className="btn btn-primary" >Login</button>
                         </Form>
                     )}
                 </Formik>

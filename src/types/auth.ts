@@ -1,24 +1,32 @@
+import internal from "stream";
+
 export enum AuthActionTypes {
     LOGIN_AUTH = "LOGIN_AUTH",
     LOGIN_AUTH_SUCCESS = " LOGIN_AUTH_SUCCESS",
     LOGIN_AUTH_FAILED = "LOGIN_AUTH_FAILED",
+    REGISTER_AUTH = "REGISTER_AUTH",
+    REGISTER_AUTH_SUCCESS = " REGISTER_AUTH_SUCCESS",
+    REGISTER_AUTH_FAILED = "REGISTER_AUTH_FAILED",
 }
+
 export interface ILoginModel {
     email: string,
     password: string
 }
-export interface IRegisterPage {
+export interface IRegisterModel {
     name: string,
     email: string,
     password: string,
-    confirm_password: string
+    password_confirmation: string
 };
+
 export interface IUser {
+    id: number,
     email: string,
-    image: string
+    name: string
 }
 
-export interface ILoginResponseUser {
+export interface ILoginResponse {
     expires_in: string,
     access_token: string,
     user: IUser
@@ -45,5 +53,19 @@ export interface LoginAuthFailedAction {
     payload: string
 }
 
+export interface RegisterAuthAction {
+    type: AuthActionTypes.REGISTER_AUTH
+}
 
-export type AuthAction = LoginAuthAction | LoginAuthSuccessAction | LoginAuthFailedAction;
+export interface RegisterAuthSuccessAction {
+    type: AuthActionTypes.REGISTER_AUTH_SUCCESS,
+    payload: IUser
+}
+
+export interface RegisterAuthFailedAction {
+    type: AuthActionTypes.REGISTER_AUTH_FAILED,
+    payload: string
+}
+
+export type LoginAction = LoginAuthAction | LoginAuthSuccessAction | LoginAuthFailedAction;
+export type RegisterAction = RegisterAuthAction | RegisterAuthSuccessAction | RegisterAuthFailedAction;

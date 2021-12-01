@@ -4,7 +4,7 @@ import { Field } from "formik";
 type AppProps = {
     label: string,
     field: string,
-    type?: string,
+    type?: "text" | "email" | "password",
 }
 
 const InputGroup = ({ label, field, type = "text" }: AppProps) => {
