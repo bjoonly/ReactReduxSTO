@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { IRegisterModel } from "../../../types/auth";
 import { useActions } from "../../../hooks/useActions";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 const RegisterPage: React.FC = () => {
     const { RegisterUser } = useActions();
@@ -29,10 +30,12 @@ const RegisterPage: React.FC = () => {
                     onSubmit={async (values: IRegisterModel) => {
                         try {
                             await RegisterUser(values);
+                            toast.success("User successfully registered!");
                             navigate("/");
                         }
                         catch (ex) {
-
+                            let message = "Register failed!"
+                            toast.error(message);
                         }
                     }}>
                     {({ errors, touched }) => (

@@ -1,5 +1,3 @@
-import internal from "stream";
-
 export enum AuthActionTypes {
     LOGIN_AUTH = "LOGIN_AUTH",
     LOGIN_AUTH_SUCCESS = " LOGIN_AUTH_SUCCESS",
@@ -7,6 +5,7 @@ export enum AuthActionTypes {
     REGISTER_AUTH = "REGISTER_AUTH",
     REGISTER_AUTH_SUCCESS = " REGISTER_AUTH_SUCCESS",
     REGISTER_AUTH_FAILED = "REGISTER_AUTH_FAILED",
+    LOGOUT_AUTH_SUCCESS = "LOGOUT_AUTH_SUCCESS"
 }
 
 export interface ILoginModel {
@@ -66,6 +65,10 @@ export interface RegisterAuthFailedAction {
     type: AuthActionTypes.REGISTER_AUTH_FAILED,
     payload: string
 }
+export interface LogoutAuthSuccessAction {
+    type: AuthActionTypes.LOGOUT_AUTH_SUCCESS,
+}
 
 export type LoginAction = LoginAuthAction | LoginAuthSuccessAction | LoginAuthFailedAction;
 export type RegisterAction = RegisterAuthAction | RegisterAuthSuccessAction | RegisterAuthFailedAction;
+export type LogoutAction = LogoutAuthSuccessAction;
