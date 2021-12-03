@@ -7,7 +7,19 @@ export enum AuthActionTypes {
     REGISTER_AUTH_FAILED = "REGISTER_AUTH_FAILED",
     LOGOUT_AUTH_SUCCESS = "LOGOUT_AUTH_SUCCESS"
 }
-
+export type ILoginError = {
+    status: number,
+    email: Array<string>,
+    password: Array<string>,
+    error: string
+};
+export type IRegisterError = {
+    status: number,
+    name: Array<string>,
+    email: Array<string>,
+    password: Array<string>,
+    error: string
+};
 export interface ILoginModel {
     email: string,
     password: string
@@ -35,7 +47,7 @@ export interface AuthState {
     user: IUser,
     isAuth: boolean,
     loading: boolean,
-    error: null | string
+    error: null | string | IRegisterError | ILoginError
 }
 
 export interface LoginAuthAction {
@@ -49,7 +61,7 @@ export interface LoginAuthSuccessAction {
 
 export interface LoginAuthFailedAction {
     type: AuthActionTypes.LOGIN_AUTH_FAILED,
-    payload: string
+    payload: string | ILoginError
 }
 
 export interface RegisterAuthAction {
@@ -63,7 +75,7 @@ export interface RegisterAuthSuccessAction {
 
 export interface RegisterAuthFailedAction {
     type: AuthActionTypes.REGISTER_AUTH_FAILED,
-    payload: string
+    payload: string | IRegisterError
 }
 export interface LogoutAuthSuccessAction {
     type: AuthActionTypes.LOGOUT_AUTH_SUCCESS,

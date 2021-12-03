@@ -1,6 +1,7 @@
-import { LoginAction, AuthActionTypes, RegisterAction, ILoginModel, ILoginResponse, IRegisterModel, LogoutAction } from "../../types/auth"
+import { LoginAction, AuthActionTypes, RegisterAction, ILoginModel, ILoginResponse, IRegisterModel, LogoutAction, IRegisterError, ILoginError } from "../../types/auth"
 import { Dispatch } from "react"
 import http from "../../http_common";
+import axios, { AxiosError } from "axios";
 
 export const LoginUser = (data: ILoginModel) => {
     return async (dispatch: Dispatch<LoginAction>) => {
@@ -13,7 +14,15 @@ export const LoginUser = (data: ILoginModel) => {
                 })
                 return Promise.resolve();
             }).catch(error => {
-                dispatch({ type: AuthActionTypes.LOGIN_AUTH_FAILED, payload: error.response.statusText })
+                if (axios.isAxiosError(error)) {
+                    const serverError = error as AxiosError<ILoginError>;
+                    if (serverError && serverError.response) {
+                        dispatch({ type: AuthActionTypes.LOGIN_AUTH_FAILED, payload: serverError.response.data })
+                        serverError.response.data.status = serverError.response.status
+                        serverError.response.data.error = serverError.response.statusText
+                        return Promise.reject(serverError.response.data);
+                    }
+                }
                 return Promise.reject(error.response.status)
             });
     }
@@ -21,7 +30,6 @@ export const LoginUser = (data: ILoginModel) => {
 
 export const RegisterUser = (data: IRegisterModel) => {
     return async (dispatch: Dispatch<RegisterAction>) => {
-
         dispatch({ type: AuthActionTypes.REGISTER_AUTH });
         await http.post<ILoginResponse>('api/auth/register', data)
             .then(response => {
@@ -31,12 +39,19 @@ export const RegisterUser = (data: IRegisterModel) => {
                 })
                 return Promise.resolve();
             }).catch(error => {
-                dispatch({ type: AuthActionTypes.REGISTER_AUTH_FAILED, payload: error.response.statusText })
+                if (axios.isAxiosError(error)) {
+                    const serverError = error as AxiosError<IRegisterError>;
+                    if (serverError && serverError.response) {
+                        serverError.response.data.status = serverError.response.status
+                        serverError.response.data.error = serverError.response.statusText
+                        dispatch({ type: AuthActionTypes.REGISTER_AUTH_FAILED, payload: serverError.response.data })
+                        return Promise.reject(serverError.response.data);
+                    }
+                }
                 return Promise.reject(error.response.status)
             });
     }
 }
-
 export const LogoutUser = () => {
     return async (dispatch: Dispatch<LogoutAction>) => {
         //  await http.post('api/auth/logout')

@@ -30,6 +30,13 @@ export const authReducer = (state = initialState, action: LoginAction | Register
                 error: action.payload
             }
         }
+        case AuthActionTypes.REGISTER_AUTH_FAILED: {
+            return {
+                ...state,
+                isAuth: false,
+                error: action.payload
+            }
+        }
         case AuthActionTypes.LOGOUT_AUTH_SUCCESS: {
             return {
                 ...state,
