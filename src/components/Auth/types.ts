@@ -5,8 +5,11 @@ export enum AuthActionTypes {
     REGISTER_AUTH = "REGISTER_AUTH",
     REGISTER_AUTH_SUCCESS = " REGISTER_AUTH_SUCCESS",
     REGISTER_AUTH_FAILED = "REGISTER_AUTH_FAILED",
-    LOGOUT_AUTH_SUCCESS = "LOGOUT_AUTH_SUCCESS"
+    LOGOUT_AUTH_SUCCESS = "LOGOUT_AUTH_SUCCESS",
+    GET_PROFILE_SUCCESS = "GET_PROFILE_SUCCESS",
+    GET_PROFILE_FAILED = "GET_PROFILE_FAILED"
 }
+
 export type ILoginError = {
     status: number,
     email: Array<string>,
@@ -32,7 +35,7 @@ export interface IRegisterModel {
 };
 
 export interface IUser {
-    id: number,
+    id?: number,
     email: string,
     name: string
 }
@@ -40,8 +43,8 @@ export interface IUser {
 export interface ILoginResponse {
     expires_in: string,
     access_token: string,
-    user: IUser
 }
+
 
 export interface AuthState {
     user: IUser,
@@ -53,7 +56,14 @@ export interface AuthState {
 export interface LoginAuthAction {
     type: AuthActionTypes.LOGIN_AUTH
 }
-
+export interface GetProfileSuccessAction {
+    type: AuthActionTypes.GET_PROFILE_SUCCESS,
+    payload: IUser
+}
+export interface GetProfileFailedAction {
+    type: AuthActionTypes.GET_PROFILE_FAILED,
+    payload: string
+}
 export interface LoginAuthSuccessAction {
     type: AuthActionTypes.LOGIN_AUTH_SUCCESS,
     payload: IUser
@@ -70,7 +80,7 @@ export interface RegisterAuthAction {
 
 export interface RegisterAuthSuccessAction {
     type: AuthActionTypes.REGISTER_AUTH_SUCCESS,
-    payload: IUser
+    //payload: IUser
 }
 
 export interface RegisterAuthFailedAction {
@@ -84,3 +94,4 @@ export interface LogoutAuthSuccessAction {
 export type LoginAction = LoginAuthAction | LoginAuthSuccessAction | LoginAuthFailedAction;
 export type RegisterAction = RegisterAuthAction | RegisterAuthSuccessAction | RegisterAuthFailedAction;
 export type LogoutAction = LogoutAuthSuccessAction;
+export type ProfileAction = GetProfileSuccessAction | GetProfileFailedAction;

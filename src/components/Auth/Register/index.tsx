@@ -1,7 +1,7 @@
 import { Formik, Form } from "formik";
-import React from "react";
+import React, { useState } from "react";
 import InputGroup from "../../common/inputGroup";
-import { IRegisterError, IRegisterModel } from "../../../types/auth";
+import { IRegisterError, IRegisterModel } from "../types";
 import { useActions } from "../../../hooks/useActions";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
@@ -10,7 +10,7 @@ import { RegisterScheme } from "./validation";
 
 const RegisterPage: React.FC = () => {
     const { RegisterUser } = useActions();
-
+    const [loading, setLoading] = useState<boolean>(false);
     const navigate = useNavigate();
 
     const initialValues: IRegisterModel = { name: '', email: '', password: '', password_confirmation: '' };
@@ -23,22 +23,23 @@ const RegisterPage: React.FC = () => {
                     validationSchema={RegisterScheme}
                     onSubmit={async (values: IRegisterModel, { setFieldError }) => {
                         try {
+                            setLoading(true)
                             await RegisterUser(values);
                             toast.success("User successfully registered!");
                             navigate("/");
                         }
                         catch (ex) {
+                            setLoading(false)
                             const serverErrors = ex as IRegisterError;
-                            if (serverErrors.name && serverErrors.name.length > 0) {
-                                setFieldError("name", serverErrors.name[0]);
-                            }
-                            if (serverErrors.email && serverErrors.email.length > 0) {
-                                setFieldError("email", serverErrors.email[0]);
-                            }
-                            if (serverErrors.password && serverErrors.password.length > 0) {
-                                setFieldError("password", serverErrors.password[0]);
-                            }
+                            Object.entries(serverErrors).forEach(([key, value]) => {
+                                if (Array.isArray(value)) {
+                                    setFieldError(key, value[0]);
+                                }
+                            });
                             let message = "Register failed!"
+                            if (serverErrors.status === 422) {
+                                message += "Validation failed."
+                            }
                             toast.error(message);
                         }
                     }}>
@@ -74,7 +75,7 @@ const RegisterPage: React.FC = () => {
                                     touched={touched.password_confirmation}
                                     error={errors.password_confirmation} />
                             </div>
-                            <button type="submit" className="btn btn-primary">Register</button>
+                            <button type="submit" disabled={loading} className="btn btn-primary">Register</button>
                         </Form>
                     )}
                 </Formik>

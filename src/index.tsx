@@ -7,7 +7,11 @@ import './index.css';
 import App from './App';
 import { Provider } from 'react-redux';
 import { store } from "./store";
+import { AuthUser } from './components/Auth/actions';
 
+if (localStorage.token) {
+  AuthUser(localStorage.token, store.dispatch)
+}
 ReactDOM.render(
   <Provider store={store}>
     <BrowserRouter>

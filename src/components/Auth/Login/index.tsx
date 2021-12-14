@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import InputGroup from "../../common/inputGroup";
 import { Formik, Form } from "formik";
-import { ILoginError, ILoginModel } from "../../../types/auth";
+import { ILoginError, ILoginModel } from "../types";
 import { useActions } from "../../../hooks/useActions";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
@@ -10,7 +10,7 @@ import { LoginScheme } from "./validation";
 const LoginPage: React.FC = () => {
     const { LoginUser } = useActions();
     const navigate = useNavigate();
-
+    const [loading, setLoading] = useState<boolean>(false);
     const initialValues: ILoginModel = { email: '', password: '' };
 
     return (
@@ -23,18 +23,20 @@ const LoginPage: React.FC = () => {
                     validationSchema={LoginScheme}
                     onSubmit={async (values: ILoginModel, { setFieldError }) => {
                         try {
+                            setLoading(true)
                             await LoginUser(values);
                             toast.success("Login is successful!");
                             navigate("/");
                         }
                         catch (ex) {
+                            setLoading(false)
                             const serverErrors = ex as ILoginError;
-                            if (serverErrors.email && serverErrors.email.length > 0) {
-                                setFieldError("email", serverErrors.email[0]);
-                            }
-                            if (serverErrors.password && serverErrors.password.length > 0) {
-                                setFieldError("password", serverErrors.password[0]);
-                            }
+                            Object.entries(serverErrors).forEach(([key, value]) => {
+                                if (Array.isArray(value)) {
+                                    setFieldError(key, value[0]);
+                                }
+                            });
+
                             let message = "Login failed! "
                             if (serverErrors.status === 401) {
                                 message += "The user with entered data doesn't exist."
@@ -63,7 +65,7 @@ const LoginPage: React.FC = () => {
                                     error={errors.password}
                                     type="password" />
                             </div>
-                            <button type="submit" className="btn btn-primary" >Login</button>
+                            <button type="submit" disabled={loading} className="btn btn-primary" >Login</button>
                         </Form>
                     )}
                 </Formik>

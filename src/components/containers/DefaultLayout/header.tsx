@@ -30,18 +30,26 @@ const Header = () => {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     {isAuth ? (
-                        <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-                            <li className="nav-item">
-                                <Link className="nav-link " to="/profile">
-                                    <BsPersonCircle />
-                                    &nbsp;&nbsp;
-                                    {user?.email}
-                                </Link>
-                            </li>
-                            <li className="nav-item nav-link " role="button" onClick={onLogout}>
-                                Logout
-                            </li>
-                        </ul>
+                        <>
+                            <ul className="navbar-nav  mb-0">
+                                <li className="nav-item mr-0">
+                                    <Link className="nav-link " to="/products/list">
+                                        Product list </Link>
+                                </li>
+                            </ul>
+                            <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+                                <li className="nav-item">
+                                    <Link className="nav-link " to="/profile">
+                                        <BsPersonCircle />
+                                        &nbsp;&nbsp;
+                                        {user?.email}
+                                    </Link>
+                                </li>
+                                <li className="nav-item nav-link " role="button" onClick={onLogout}>
+                                    Logout
+                                </li>
+                            </ul>
+                        </>
                     ) : (
                         <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
                             <li className="nav-item">
