@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { EditProductScheme } from "./validation";
 import { IProductError, IProductItem } from "../types";
 import { useTypedSelector } from "../../../hooks/useTypedSelector";
-
+import { url as serverURL } from "../../../http_common"
 
 const EditProductPage: React.FC = () => {
     const { GetProduct, UpdateProduct } = useActions();
@@ -15,6 +15,18 @@ const EditProductPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const { currentProduct } = useTypedSelector((redux) => redux.product);
     const navigate = useNavigate();
+
+    const [file, setFile] = React.useState<string>("")
+    const [fileForSend, setFileForSend] = React.useState<File>()
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const fileList = e.target.files;
+
+        if (!fileList) return;
+        setFile(URL.createObjectURL(fileList[0]))
+        setFileForSend(fileList[0]);
+    };
+
     useEffect(() => {
         async function getProduct() {
             try {
@@ -24,8 +36,9 @@ const EditProductPage: React.FC = () => {
                 let id = params.get("id");
                 if (id === null || id === undefined || id === "")
                     navigate("/products/list");
-                else
+                else {
                     await GetProduct(id);
+                }
                 setLoadingPage(false)
             }
             catch (ex) {
@@ -51,9 +64,10 @@ const EditProductPage: React.FC = () => {
                         onSubmit={async (values: IProductItem, { setFieldError }) => {
                             try {
                                 setLoading(true)
-                                await UpdateProduct(values);
+                                await UpdateProduct(values, fileForSend);
                                 toast.success("Product updated successfully!");
                                 navigate("/products/list");
+
                             }
                             catch (ex) {
                                 setLoading(false)
@@ -85,6 +99,15 @@ const EditProductPage: React.FC = () => {
                                         field="detail"
                                         touched={touched.detail}
                                         error={errors.detail} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="Image">
+                                        <img src={file == "" ? `${serverURL}${currentProduct.image}` : file}
+                                            width="200px"
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                    </label>
+                                    <input className="form-control d-none" type="file" name="Image" id="Image" onChange={handleImageChange} />
                                 </div>
                                 <button type="submit" disabled={loading} className="btn btn-success">Update Product</button>
                             </Form>

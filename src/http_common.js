@@ -1,7 +1,7 @@
 import axios from "axios";
-
+export const url = "http://local.laravel.local.php.com:100/";
 const myAxios = axios.create({
-    baseURL: "http://local.laravel.local.php.com:100/",
+    baseURL: url,
     headers: {
         "Content-type": "application/json",
     }

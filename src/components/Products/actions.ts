@@ -22,11 +22,19 @@ export const GetProducts = (search: IProductSearch) => {
     }
 }
 
-export const AddProduct = (data: IProductModel) => {
+export const AddProduct = (data: IProductModel, image: File) => {
     return async (dispatch: Dispatch<ProductsActions>) => {
         try {
-            const response = await http.post<IProductsResponseModel>('api/products/store', data)
-            return Promise.resolve(response);
+            var formData = new FormData();
+            formData.append("name", data.name);
+            formData.append("detail", data.detail);
+            formData.append("file", image);
+            await http.post('api/products/store', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+            return Promise.resolve();
         }
         catch (ex) {
             if (axios.isAxiosError(ex)) {
@@ -41,6 +49,7 @@ export const AddProduct = (data: IProductModel) => {
         }
     }
 }
+
 export const DeleteProduct = (id: number) => {
     return async (dispatch: Dispatch<ProductsActions>) => {
         try {
@@ -60,10 +69,21 @@ export const DeleteProduct = (id: number) => {
         }
     }
 }
-export const UpdateProduct = (data: IProductItem) => {
+
+export const UpdateProduct = (data: IProductItem, image?: File) => {
     return async (dispatch: Dispatch<ProductsActions>) => {
         try {
-            await http.put<IProductResponseModel>(`api/products/update/${data.id}`, data)
+            var formData = new FormData();
+            formData.append("name", data.name);
+            formData.append("detail", data.detail);
+            if (image)
+                formData.append("file", image);
+
+            await http.post(`api/products/update/${data.id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
             return Promise.resolve();
         }
         catch (ex) {
@@ -79,6 +99,7 @@ export const UpdateProduct = (data: IProductItem) => {
         }
     }
 }
+
 export const GetProduct = (id: number | string) => {
     return async (dispatch: Dispatch<ProductsActions>) => {
         try {
@@ -86,7 +107,7 @@ export const GetProduct = (id: number | string) => {
 
             dispatch({
                 type: ProductActionTypes.GET_PRODUCT_SUCCESS,
-                payload: { id: response.data.data.id, name: response.data.data.name, detail: response.data.data.detail }
+                payload: { id: response.data.data.id, name: response.data.data.name, detail: response.data.data.detail, image: response.data.data.image }
             });
             return Promise.resolve();
         }

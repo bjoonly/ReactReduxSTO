@@ -6,13 +6,16 @@ export enum ProductActionTypes {
 }
 
 export interface IProductItem {
-    id: number
-    name: string
-    detail: string
+    id: number,
+    name: string,
+    detail: string,
+    image?: string
 }
 export interface IProductSearch {
-    page?: number | string | null
-    name?: string | null
+    page?: number | string | null,
+    id?: string | number | null,
+    name?: string | null,
+    detail?: string | null
 }
 export interface IProductsResponseModel {
     data: Array<IProductItem>,

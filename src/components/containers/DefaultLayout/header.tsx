@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useTypedSelector } from "../../../hooks/useTypedSelector";
 import { BsPersonCircle } from "react-icons/bs";
 import { useActions } from "../../../hooks/useActions";
-import 'bootstrap/dist/js/bootstrap.bundle';
 
 const Header = () => {
     const { LogoutUser } = useActions();

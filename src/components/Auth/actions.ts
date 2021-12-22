@@ -61,7 +61,7 @@ export const RegisterUser = (data: IRegisterModel) => {
 export const LogoutUser = () => {
     return async (dispatch: Dispatch<LogoutAction>) => {
         try {
-            await http.post('api/auth/logout')
+            // await http.post('api/auth/logout')
             localStorage.removeItem("token");
             dispatch({
                 type: AuthActionTypes.LOGOUT_AUTH_SUCCESS,
