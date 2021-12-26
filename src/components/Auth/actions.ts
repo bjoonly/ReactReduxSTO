@@ -35,10 +35,21 @@ export const AuthUser = (token: string, dispatch: Dispatch<LoginAction>) => {
     })
 }
 
-export const RegisterUser = (data: IRegisterModel) => {
+export const RegisterUser = (data: IRegisterModel, image: File) => {
     return async (dispatch: Dispatch<RegisterAction>) => {
         try {
-            await http.post<ILoginResponse>('api/auth/register', data)
+            var formData = new FormData();
+            formData.append("name", data.name);
+            formData.append("email", data.email);
+            formData.append("password", data.password);
+            formData.append("password_confirmation", data.password_confirmation);
+            formData.append("file", image);
+            await http.post<ILoginResponse>('api/auth/register', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+
             dispatch({
                 type: AuthActionTypes.REGISTER_AUTH_SUCCESS,
             })
@@ -80,7 +91,7 @@ export const GetProfile = () => {
             const response = await http.get<IUser>('api/auth/user-profile')
             dispatch({
                 type: AuthActionTypes.GET_PROFILE_SUCCESS,
-                payload: { id: response.data.id, email: response.data.email, name: response.data.name }
+                payload: { id: response.data.id, email: response.data.email, name: response.data.name, image: response.data.image }
             });
             return Promise.resolve(response.data);
 

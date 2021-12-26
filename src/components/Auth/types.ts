@@ -37,7 +37,8 @@ export interface IRegisterModel {
 export interface IUser {
     id?: number,
     email: string,
-    name: string
+    name: string,
+    image?: string
 }
 
 export interface ILoginResponse {

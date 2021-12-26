@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useActions } from "../../../hooks/useActions";
 import { useTypedSelector } from "../../../hooks/useTypedSelector";
+import { url as serverURL } from "../../../http_common"
 
 const UserProfilePage: React.FC = () => {
     const { GetProfile } = useActions();
@@ -30,7 +31,7 @@ const UserProfilePage: React.FC = () => {
                             <div className="card">
                                 <div className="card-body">
                                     <div className="d-flex flex-column align-items-center text-center">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin" className="rounded-circle" width="150" />
+                                        <img src={`${serverURL}${user.image}`} alt="profile-image" className="w-100" />
                                     </div>
                                 </div>
                             </div>

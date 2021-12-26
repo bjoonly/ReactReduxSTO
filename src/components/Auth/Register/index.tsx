@@ -1,5 +1,5 @@
 import { Formik, Form } from "formik";
-import React, { useEffect, useRef, useState } from "react";
+import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import InputGroup from "../../common/inputGroup";
 import { IRegisterError, IRegisterModel } from "../types";
 import { useActions } from "../../../hooks/useActions";
@@ -13,46 +13,66 @@ const RegisterPage: React.FC = () => {
     const { RegisterUser } = useActions();
     const [loading, setLoading] = useState<boolean>(false);
     const navigate = useNavigate();
-    const [image, setImage] = useState<string>("https://cdn.pixabay.com/photo/2017/01/18/17/39/cloud-computing-1990405_640.png");
+    const modalRef = useRef(null);
+    const [fileSelected, setFileSelected] = React.useState<string>("https://cdn.picpng.com/icon/upload-files-icon-66764.png")
+    const [cropperObj, setCropperObj] = useState<Cropper>();
+    const imgRef = useRef<HTMLImageElement>(null);
 
-    let modal: Modal;
-    let cropper: Cropper;
 
-    const modalRef = useRef<HTMLDivElement>(null);
-    const imageRef = useRef<HTMLImageElement>(null);
+    const selectImage = async (url: string) => {
+        if (!cropperObj) {
+            const cropper = new Cropper(imgRef.current as HTMLImageElement, {
+                aspectRatio: 1 / 1,
+                viewMode: 1,
+                dragMode: 'move',
+            });
+            cropper.replace(url);
+            setCropperObj(cropper);
+        }
+        else
+            cropperObj?.replace(url);
 
-    useEffect(() => {
-        modal = new Modal(modalRef.current as Element, {
-            backdrop: "static",
-            keyboard: false
-        });
-    }, [])
-
-    const selectImage = () => {
-        const modalEle = modalRef.current
-        const modal = new Modal(modalEle as unknown as Element, {
+        const modalEle = modalRef.current;
+        const bsModal = new Modal(modalEle as unknown as Element, {
             backdrop: "static",
             keyboard: false,
-
         });
-        modal.show()
-        const image = document.getElementById("cropper-image")
-        cropper = new Cropper(image as any, {
-            aspectRatio: 1 / 1,
-            viewMode: 3,
-            dragMode: "move",
-            crop(event) { },
-        })
-
+        bsModal.show();
     }
-    const handleOnChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (!files)
-            return;
-        await setImage(URL.createObjectURL(files[0]))
-        await selectImage()
 
+    const base64ImageToBlob = (str: string) => {
+        var pos = str.indexOf(';base64,');
+        var type = str.substring(5, pos);
+        var b64 = str.substr(pos + 8);
+
+        var imageContent = atob(b64);
+
+        var buffer = new ArrayBuffer(imageContent.length);
+        var view = new Uint8Array(buffer);
+
+        for (var n = 0; n < imageContent.length; n++) {
+            view[n] = imageContent.charCodeAt(n);
+        }
+
+        var blob = new Blob([buffer], { type: type });
+
+        return blob;
     }
+    const handleImageChange = async function (e: React.ChangeEvent<HTMLInputElement>) {
+        const fileList = e.target.files;
+        if (!fileList || fileList.length == 0) return;
+        selectImage(URL.createObjectURL(fileList[0]));
+    };
+
+    const rotateImg = () => {
+        cropperObj?.rotate(90);
+    };
+
+    const modalSave = async function (e: React.MouseEvent<HTMLElement>) {
+        const base = cropperObj?.getCroppedCanvas().toDataURL() as string;
+        await setFileSelected(base)
+    };
+
 
     const initialValues: IRegisterModel = { name: '', email: '', password: '', password_confirmation: '' };
     return (
@@ -65,10 +85,20 @@ const RegisterPage: React.FC = () => {
                         validationSchema={RegisterScheme}
                         onSubmit={async (values: IRegisterModel, { setFieldError }) => {
                             try {
-                                setLoading(true)
-                                await RegisterUser(values);
-                                toast.success("User successfully registered!");
-                                navigate("/");
+                                if (cropperObj) {
+                                    let blob: Blob;
+                                    if (imgRef.current?.src) {
+                                        blob = base64ImageToBlob(imgRef.current?.src)
+                                        var file = new File([blob], "image");
+                                        setLoading(true)
+                                        await RegisterUser(values, file);
+                                        toast.success("User successfully registered!");
+                                        navigate("/");
+                                    }
+                                }
+                                else {
+                                    toast.error("Register failed. File is required!");
+                                }
                             }
                             catch (ex) {
                                 setLoading(false)
@@ -90,9 +120,9 @@ const RegisterPage: React.FC = () => {
                             <div className="form d-md-flex justify-content-around">
                                 <div className="p-2 mb-3 md-md-0 ">
                                     <label htmlFor="image">
-                                        <img id="img_preview" className="w-100" src={image} style={{ cursor: "pointer" }} />
+                                        <img id="img_preview" className="w-100" src={fileSelected} style={{ cursor: "pointer" }} />
                                     </label>
-                                    <input name="image" id="image" type="file" accept="image/*" onChange={handleOnChange} className="form-control d-none" />
+                                    <input name="image" id="image" type="file" accept="image/*" onChange={handleImageChange} className="form-control d-none" />
                                 </div>
                                 <Form className="p-2 col-12 col-md-7">
                                     <h1>Register</h1>
@@ -148,9 +178,16 @@ const RegisterPage: React.FC = () => {
                             ></button>
                         </div>
                         <div className="modal-body w-100">
-                            <p>Modal body text goes here.</p>
+                            <button
+                                type="button"
+                                className="btn btn-primary mb-3"
+                                onClick={rotateImg}
+                            >
+                                Rotate
+                            </button>
                             <div>
-                                <img id="cropper-image" src={image} />
+                                <img ref={imgRef as LegacyRef<HTMLImageElement>}
+                                    src={fileSelected} id="image" />
                             </div>
                         </div>
                         <div className="modal-footer">
@@ -161,7 +198,7 @@ const RegisterPage: React.FC = () => {
                             >
                                 Close
                             </button>
-                            <button type="button" className="btn btn-primary" >
+                            <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={modalSave}>
                                 Save changes
                             </button>
                         </div>
